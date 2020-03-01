@@ -26,5 +26,13 @@ lazy val intellijSupport = project.in(file("intellij-support")).settings(
 
 onLoad in Global := (onLoad in Global).value andThen { s: State => "project library" :: s }
 
-//resolvers += Resolver.sonatypeRepo("releases")
-//addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+publishMavenStyle in ThisBuild := true
+credentials in ThisBuild += Credentials(Path.userHome / ".sbt" / ".credentials")
+
+publishTo in ThisBuild := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}

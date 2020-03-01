@@ -71,8 +71,6 @@ trait Department extends Record {
   def name: String
 }
 
-
-
 val data = Map("id" -> 100, "firstName" -> "John", "lastName" -> "Smith", "department" -> Map("name" -> "sales"))
 println(Employee(data).department)  //will throw an exception, because a Department is expected, but a Map is found
 ```

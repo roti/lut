@@ -110,5 +110,12 @@ class RecordSpec extends AnyFlatSpec with Matchers {
   }
 
 
+  "A Record" should "have a case class-like constructor" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val record = Record2(id = 100L, name = "teststr")
+
+    record.data should be (data)
+
+  }
 
 }

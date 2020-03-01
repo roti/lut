@@ -54,20 +54,16 @@ class RecordMacroImpl(val c: whitebox.Context) {
 
     val transformedClass = ClassDef(mods, className, typeParams, Template(impl.parents, impl.self, transformedBody))
 
-    val applyMethod = q"""def apply(m: Map[String, Any]): $className = new $className {
-                           override val data = m
-                           }"""
 
     val transformedCompanionObject = companionObjectDef match {
       case None =>
-        q"object ${className.toTermName} { $applyMethod }"
+        q"object ${className.toTermName} { ${buildConstructor(className)}; ${buildConstructor2(className, abstractMethods)} }"
       case Some(ModuleDef(mods, name, Template(parents, self, body))) =>
-        ModuleDef(mods, name, Template(parents, self, body :+ applyMethod))
+        ModuleDef(mods, name, Template(parents, self, body :+ buildConstructor(className) :+ buildConstructor2(className, abstractMethods)))
     }
 
     q"$transformedClass; $transformedCompanionObject"
   }
-
 
 
   private def transformMethod(methodDef: DefDef) = {
@@ -103,14 +99,36 @@ class RecordMacroImpl(val c: whitebox.Context) {
     //only abstract methods are part of the copy method
     val argsWithValues = abstractMethods.map { m =>
       val DefDef(modifiers, name, typeParams, argss, returnType, body) = m
-        //this needs to be a value definition because of the default parameter value
-        (q"val $name: $returnType = $name", q"(${name.toString}, $name)")
+      //this needs to be a value definition because of the default parameter value
+      (q"val $name: $returnType = $name", q"(${name.toString}, $name)")
     }
 
     val args = argsWithValues.map(_._1)
     val values = argsWithValues.map(_._2)
 
     q"def copy(..$args): $className = ${className.toTermName}(data ++ Seq(..$values))"
+  }
+
+
+  private def buildConstructor2(className: TypeName, abstractMethods: Seq[DefDef]) = {
+    //only abstract methods are part of the copy method
+    val argsWithValues = abstractMethods.map { m =>
+      val DefDef(modifiers, name, typeParams, argss, returnType, body) = m
+      //this needs to be a value definition because of the default parameter value
+      (q"$name: $returnType", q"(${name.toString}, $name)")
+    }
+
+    val args = argsWithValues.map(_._1)
+    val values = argsWithValues.map(_._2)
+
+    q"def apply(..$args): $className = ${className.toTermName}(Map(..$values))"
+  }
+
+
+  private def buildConstructor(className: TypeName) = {
+    q"""def apply(m: Map[String, Any]): $className = new $className {
+          override val data = m
+    }"""
   }
 
 
