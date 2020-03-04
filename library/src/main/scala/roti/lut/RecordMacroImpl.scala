@@ -11,7 +11,7 @@ class RecordMacroImpl(val c: whitebox.Context) {
 
   import c.universe._
 
-  private lazy val debugEnabled = true
+  private lazy val debugEnabled = false
 
   def transformClass(annottees: c.Expr[Any]*): c.Expr[Record] = {
 

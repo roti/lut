@@ -10,7 +10,19 @@ Scala's case classes are problematic for modelling data since they insist on str
 libraryDependencies += "com.github.roti" %% "lut" % "0.5-SNAPSHOT"
 ```
 
-Currently only scala 2.13 is supported.
+### Scala Versions
+
+Supported scala versions are 2.11, 2.12 and 2.13.
+
+For scala 2.13 you need to enable macro annotations:
+```scala
+scalacOptions += "-Ymacro-annotations"
+```
+
+For scala 2.12 and earlier you need to add the macro paradise compiler plugin to your project:
+```scala
+addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1")
+```
 
 ### Usage
 
