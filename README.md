@@ -29,7 +29,13 @@ trait Employee extends Record {
 }
 ```
 
-The annotation transforms the trait with a macro. It provides implementations for the methods, adds a `copy` method, and two `apply` methods in the companion object, one for creating instances from maps, and one for creating instances from individual fields.
+The annotation transforms the trait with a macro so that it can be used like a case class. It provides:
+* implementations for the abstract methods 
+* a `copy` method, like the one available in case classes
+* an `apply` method in the companion object, like the one available in case classes
+* an additional `apply` method, to create instances from a `Map[String, Any]`
+* an `unapply` method for deconstructing instances into the individual fields 
+
 Now `Employee` can be used as if it were a fully implemented class:
 
 ```scala
@@ -41,6 +47,9 @@ val employee2 = employee.copy(phoneNumber = Some("123"))
 println(employee.firstName + " " + employee.lastName + " " + employee.phoneNumber )  //"John Smith Some(123)"
 
 val employee3 = Employee(id = 100, firstName = "John", lastName = "Smith", phoneNumber = None)
+
+val Employee(id, fName, lName, _) = employee3
+println(id + " " + fName + " " + lName)  //100 John Smith
 ```
 
 The data is stored as a `Map[String, Any]`, the generated implementations of the abstract methods just access the values from this map. 

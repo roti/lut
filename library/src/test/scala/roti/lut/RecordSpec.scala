@@ -118,4 +118,14 @@ class RecordSpec extends AnyFlatSpec with Matchers {
 
   }
 
+  "A Record" should "be have an extractor object" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val record = Record2(data)
+
+    val Record2(id, name) = record
+    id should be (100L)
+    name should be ("teststr")
+  }
+
+
 }

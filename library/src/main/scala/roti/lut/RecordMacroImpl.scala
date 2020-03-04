@@ -11,7 +11,7 @@ class RecordMacroImpl(val c: whitebox.Context) {
 
   import c.universe._
 
-  private lazy val debugEnabled = false
+  private lazy val debugEnabled = true
 
   def transformClass(annottees: c.Expr[Any]*): c.Expr[Record] = {
 
@@ -43,6 +43,15 @@ class RecordMacroImpl(val c: whitebox.Context) {
       }
     ).flatten
 
+    val recordParent = impl.parents.find {
+      case Ident(TypeName("Record")) => true
+      case _ => false
+    }
+
+    if (!recordParent.isDefined) {
+      c.abort(c.enclosingPosition, s"$className needs to extend Record")
+    }
+
 
     val transformedBody = impl.body.map(m =>
       m match {
@@ -57,9 +66,9 @@ class RecordMacroImpl(val c: whitebox.Context) {
 
     val transformedCompanionObject = companionObjectDef match {
       case None =>
-        q"object ${className.toTermName} { ${buildConstructor(className)}; ${buildConstructor2(className, abstractMethods)} }"
+        q"object ${className.toTermName} { ${buildConstructor(className)}; ${buildConstructor2(className, abstractMethods)}; ${buildUnapplyMethod(className, abstractMethods)} }"
       case Some(ModuleDef(mods, name, Template(parents, self, body))) =>
-        ModuleDef(mods, name, Template(parents, self, body :+ buildConstructor(className) :+ buildConstructor2(className, abstractMethods)))
+        ModuleDef(mods, name, Template(parents, self, body :+ buildConstructor(className) :+ buildConstructor2(className, abstractMethods) :+ buildUnapplyMethod(className, abstractMethods)))
     }
 
     q"$transformedClass; $transformedCompanionObject"
@@ -129,6 +138,20 @@ class RecordMacroImpl(val c: whitebox.Context) {
     q"""def apply(m: Map[String, Any]): $className = new $className {
           override val data = m
     }"""
+  }
+
+
+  private def buildUnapplyMethod(className: TypeName, abstractMethods: Seq[DefDef]) = {
+    val argsWithValues = abstractMethods.map { m =>
+      val DefDef(modifiers, name, typeParams, argss, returnType, body) = m
+      //this needs to be a value definition because of the default parameter value
+      (q"$returnType", q"x.$name")
+    }
+
+    val returnTypes = argsWithValues.map(_._1)
+    val methodCalls = argsWithValues.map(_._2)
+
+    q"def unapply(x: $className): Option[(..$returnTypes)] = Some((..$methodCalls))"
   }
 
 
