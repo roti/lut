@@ -91,10 +91,9 @@ class RecordMacroImpl(val c: whitebox.Context) {
         throw new RecordException("type parameters are not allowed on abstract method")
 
       if (returnType.toString().startsWith("Option")) {
-        q"""@roti.lut.annotation.field(${name.toString}) def $name = get(${name.toString}).asInstanceOf[$returnType]"""
-        q"""@roti.lut.annotation.field(${name.toString}) def $name = get(${name.toString}).asInstanceOf[$returnType]"""
+        q"""@roti.lut.annotation.field(${name.toString}) def $name = data.get(${name.toString}).asInstanceOf[$returnType]"""
       } else {
-        q"""@roti.lut.annotation.field(${name.toString}) def $name = apply(${name.toString}).asInstanceOf[$returnType]"""
+        q"""@roti.lut.annotation.field(${name.toString}) def $name = data.apply(${name.toString}).asInstanceOf[$returnType]"""
       }
 
     }

@@ -22,7 +22,7 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     record1.stringF should be ("teststr")
   }
 
-  "@record" should "not touch methods which already have implementations" in {
+  it should "not touch methods which already have implementations" in {
     val data = Map("id" -> 100L, "name" -> "teststr")
     val record = Record2(data)
 
@@ -83,6 +83,35 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     record2.copy(id = 301).data should be (expectedData)
   }
 
+  it should "expose the underlying map through .data" in {
+
+    val data = Map("byteF" -> 100.toByte, "shortF" -> 200.toShort, "intF" -> 300, "longF" -> 400L, "doubleF" -> 4.9d, "floatF" -> 7.5f, "bigDecimalF" -> BigDecimal(9.8), "stringF" -> "teststr")
+    val record1 = Record1(data)
+
+    record1.data should be (data)
+
+  }
+
+
+  it should "have a case class-like constructor" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val record = Record2(id = 100L, name = "teststr")
+
+    record.data should be (data)
+
+  }
+
+
+  it should "be have an extractor object" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val record = Record2(data)
+
+    val Record2(id, name) = record
+    id should be (100L)
+    name should be ("teststr")
+  }
+
+
   "The copy method" should "preserve all data from the map" in {
     val data = Map("id" -> 100, "name" -> "testusr", "anotherHiddenValue" -> 998)
     val expectedData = Map("id" -> 301, "name" -> "testusr", "anotherHiddenValue" -> 998)
@@ -91,40 +120,15 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     record2.copy(id = 301).data should be (expectedData)
   }
 
-  "A Record" should "have a Map interface" in {
-
-    val data = Map("byteF" -> 100.toByte, "shortF" -> 200.toShort, "intF" -> 300, "longF" -> 400L, "doubleF" -> 4.9d, "floatF" -> 7.5f, "bigDecimalF" -> BigDecimal(9.8), "stringF" -> "teststr")
-    val record1 = Record1(data)
-
-    record1.size should be (8)
-
-    (record1 + ("foo" -> "bar")).size should be (9)
-
-  }
 
 
   "The generated apply method" should "be added to the companion object when it exists" in {
     val record = Record3(Map.empty[String, Any])
 
     Record3("the other apply method") should be ("the other apply method")
-  }
 
-
-  "A Record" should "have a case class-like constructor" in {
-    val data = Map("id" -> 100L, "name" -> "teststr")
-    val record = Record2(id = 100L, name = "teststr")
-
-    record.data should be (data)
-
-  }
-
-  "A Record" should "be have an extractor object" in {
-    val data = Map("id" -> 100L, "name" -> "teststr")
-    val record = Record2(data)
-
-    val Record2(id, name) = record
-    id should be (100L)
-    name should be ("teststr")
+    val q = Map(2 -> "123")
+    q.seq
   }
 
 

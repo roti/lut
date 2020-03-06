@@ -10,19 +10,10 @@ import scala.reflect.ClassTag
 /**
  * Base trait for all Records
  */
-trait Record extends Map[String, Any] {
+trait Record {
 
   val data: Map[String, Any]
 
-  override def updated[V1 >: Any](key: String, value: V1): Map[String, V1] = data.updated(key, value)
-
-  override def get(key: String): Option[Any] = data.get(key)
-
-  override def iterator: Iterator[(String, Any)] = data.iterator
-
-  override def +[V1 >: Any](kv: (String, V1)): Map[String, V1] = data + kv
-
-  override def -(key: String): Map[String, Any] = data - key
 }
 
 
@@ -40,7 +31,7 @@ object Record {
 
 
   private def to(data: Map[String, Any], tpe: ru.Type): Any = {
-    //TODO use T's classloader, not ours
+  //TODO use T's classloader, not ours
     val m = ru.runtimeMirror(getClass.getClassLoader)
     val cm = m.reflectModule(tpe.typeSymbol.companion.asModule)
     val ctorSymbol = cm.symbol.typeSignature.member(ru.TermName("apply")).alternatives.find(m =>
