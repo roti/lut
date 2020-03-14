@@ -131,5 +131,48 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     q.seq
   }
 
+  "A Record" should "be comparable for equality to other records and maps" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val data2 = Map("id" -> 100L, "name" -> "teststr")
+    val record = Record2(data)
+    val record2 = Record2(data2)
+
+    record.canEqual(record2) should be (true)
+    record.canEqual(data2) should be (true)
+    record.canEqual(Seq.empty) should be (false)
+
+  }
+
+  "Record equality" should "be based on the underlying data" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val data2 = Map("id" -> 100L, "name" -> "teststr")
+    val data3 = Map("id" -> 100L, "name" -> "teststr", "foo" -> "bar")
+    val record = Record2(data)
+    val record2 = Record2(data2)
+    val record3 = Record2(data3)
+
+    (record == record2) should be (true)
+    (record.equals(record2)) should be (true)
+
+    (record == record3) should be (false)
+    (record.equals(record3)) should be (false)
+
+  }
+
+  it should "work with maps as well" in {
+    val data = Map("id" -> 100L, "name" -> "teststr")
+    val data2 = Map("id" -> 100L, "name" -> "teststr")
+    val data3 = Map("id" -> 100L, "name" -> "teststr", "foo" -> "bar")
+    val record = Record2(data)
+
+
+    (record == data2) should be (true)
+    (record.equals(data2)) should be (true)
+
+    (record == data3) should be (false)
+    (record.equals(data3)) should be (false)
+
+  }
+
 
 }

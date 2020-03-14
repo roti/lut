@@ -7,13 +7,21 @@ import scala.reflect.ClassTag
 
 
 
-/**
- * Base trait for all Records
+/** Base trait for a Record.
+ *
  */
-trait Record {
+trait Record extends Equals {
 
   val data: Map[String, Any]
 
+
+  override def canEqual(that: Any): Boolean = that.isInstanceOf[Record] || that.isInstanceOf[Map[_,_]]
+
+  override def equals(that: Any): Boolean = that match {
+    case r: Record => data.equals(r.data)
+    case m: Map[_, _] => data.equals(m)
+    case _ => false
+  }
 }
 
 

@@ -117,3 +117,13 @@ For example in a CRUD context, you can use the same trait for insert and update 
 The insert operation will receive an incomplete instance, where the id is missing (and will not try to retrieve the id), and will return a complete instance with the generated id.
 
 We basically give up some type safety to avoid creating a case class for every partial representation of the data that is needed in our workflow. 
+
+
+### Equality
+
+Since a record is meant to be just a convenient interface over a `Map`, equality is based on the underlying data. 
+Two record instances are equal if and only if the underlying maps are equal. 
+This means that even if all fields are equal, two records will not be equal if the underlying maps are not equal.
+In other words, data which is not exposed through the record's interface, participates in equality checks.
+
+Furthermore records can be compared to plain maps and the semantic is the same: if the underlying map is equal to the map then the record is equals to the map. 
