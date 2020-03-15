@@ -2,7 +2,7 @@
 
 Lut is an attempt to make data modelling easier in Scala. The design is inspired by Clojure's `defrecord`.
 
-Scala's case classes are problematic for modelling data since they insist on strictness and compose poorly. They lead to a lot of boilerplate code and conversions between classes. 
+Scala's case classes are problematic for modelling data since they insist on strictness and compose poorly. They lead to a lot of boilerplate code and conversions between classes.
 
 ### Dependency
 
@@ -126,4 +126,25 @@ Two record instances are equal if and only if the underlying maps are equal.
 This means that even if all fields are equal, two records will not be equal if the underlying maps are not equal.
 In other words, data which is not exposed through the record's interface, participates in equality checks.
 
-Furthermore records can be compared to plain maps and the semantic is the same: if the underlying map is equal to the map then the record is equals to the map. 
+Furthermore records can be compared to plain maps and the semantic is the same: if the underlying map is equal to the map then the record is equals to the map.
+
+
+### Optionality
+
+The usual approach for optionality in maps is not to include values in the map when they are missing (as opposed to including a representation of the missing value, which would be `null` in Java and `None` in Scala).
+Lut follows the same rule: when the type of a field is `Option` and the value is `None`, the underlying map does not contain any value for that field. 
+If the value is `Some(x)`, then the underlying map contains the value `x` for that field.
+
+```scala
+@record
+trait Foo extends Record {
+  def bar: Option[Int]
+  def baz: Option[String]
+}
+
+val foo1 = Foo(bar = Some(10), baz = None)
+println(foo1.data)  //Map(bar -> 10)
+```
+
+In other words, the underlying map should never have values which are instances of `Option`, but rather the value should be present in the map or not.
+**You need to be aware of this rule when building the map yourself.**

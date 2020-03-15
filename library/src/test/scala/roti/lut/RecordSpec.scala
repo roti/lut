@@ -126,9 +126,22 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     val record = Record3(Map.empty[String, Any])
 
     Record3("the other apply method") should be ("the other apply method")
+  }
 
-    val q = Map(2 -> "123")
-    q.seq
+  "The second generated apply method" should "not add None values to the underlying map" in {
+    val record = Record1(byteF = 1, shortF = 2, intF = 3, longF = 4, doubleF = 5.6d, floatF = 7.8f, bigDecimalF = BigDecimal(9.10), stringF = "11.12", maybeIntF = None, maybeStringF = None)
+    val data = Map("byteF" -> 1, "shortF" -> 2, "intF" -> 3, "longF" -> 4, "doubleF" -> 5.6d, "floatF" -> 7.8f, "bigDecimalF" -> BigDecimal(9.10), "stringF" -> "11.12")
+
+    record.data.size should be (8)
+    record.data should be (data)
+  }
+
+  it should "unbox Some values when adding to the underlying map" in {
+    val record = Record1(byteF = 1, shortF = 2, intF = 3, longF = 4, doubleF = 5.6d, floatF = 7.8f, bigDecimalF = BigDecimal(9.10), stringF = "11.12", maybeIntF = Some(13), maybeStringF = Some("14.15"))
+    val data = Map("byteF" -> 1, "shortF" -> 2, "intF" -> 3, "longF" -> 4, "doubleF" -> 5.6d, "floatF" -> 7.8f, "bigDecimalF" -> BigDecimal(9.10), "stringF" -> "11.12", "maybeIntF" -> 13, "maybeStringF" -> "14.15")
+
+    record.data.size should be (10)
+    record.data should be (data)
   }
 
   "A Record" should "be comparable for equality to other records and maps" in {

@@ -90,6 +90,7 @@ class RecordMacroImpl(val c: whitebox.Context) {
       if (typeParams.size > 0)
         throw new RecordException("type parameters are not allowed on abstract method")
 
+      //TODO find better way to compare types
       if (returnType.toString().startsWith("Option")) {
         q"""@roti.lut.annotation.field(${name.toString}) def $name = data.get(${name.toString}).asInstanceOf[$returnType]"""
       } else {
@@ -119,17 +120,35 @@ class RecordMacroImpl(val c: whitebox.Context) {
 
 
   private def buildConstructor2(className: TypeName, abstractMethods: Seq[DefDef]) = {
+
+    val resultVarName = c.freshName[TermName]("result")
+
     //only abstract methods are part of the copy method
     val argsWithValues = abstractMethods.map { m =>
       val DefDef(modifiers, name, typeParams, argss, returnType, body) = m
-      //this needs to be a value definition because of the default parameter value
-      (q"$name: $returnType", q"(${name.toString}, $name)")
+      //TODO find better way to compare types
+      if (returnType.toString().startsWith("Option")) {
+        val x = c.freshName[TermName]("x")
+        (q"val $name: $returnType = None",
+          q"""$resultVarName = $name match {
+              case None => $resultVarName
+              case Some($x) => $resultVarName + (${name.toString} -> $x)
+              }""")
+      } else {
+        (q"$name: $returnType",
+          q"$resultVarName = $resultVarName + (${name.toString} -> $name)")
+      }
     }
 
     val args = argsWithValues.map(_._1)
     val values = argsWithValues.map(_._2)
 
-    q"def apply(..$args): $className = ${className.toTermName}(Map(..$values))"
+
+    q"""def apply(..$args): $className = {
+          var $resultVarName = Map.empty[String, Any]
+          ..$values
+          ${className.toTermName}($resultVarName)
+       }"""
   }
 
 
