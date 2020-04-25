@@ -6,8 +6,8 @@ intellijBuild in ThisBuild := "193.6494.35"
 intellijPluginName in ThisBuild := "lut-intellij-support"
 
 val paradiseVersion = "2.1.1"
-val scala213 = "2.13.1"
-val scala212 = "2.12.10"
+val scala213 = "2.13.2"
+val scala212 = "2.12.11"
 val scala211 = "2.11.12"
 
 scalaVersion in ThisBuild := scala213

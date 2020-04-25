@@ -75,12 +75,14 @@ class RecordSpec extends AnyFlatSpec with Matchers {
   }
 
 
-  "A Record" should "have a copy method" in {
+  "A Record" should "have a update methods for each field" in {
     val data = Map("id" -> 100, "name" -> "testusr")
     val expectedData = Map("id" -> 301, "name" -> "testusr")
+    val expectedData2 = Map("id" -> 301, "name" -> "foo")
     val record2 = Record2(data)
 
-    record2.copy(id = 301).data should be (expectedData)
+    record2.withId(301.toLong).data should be (expectedData)
+    record2.withId(301.toLong).withName("foo") should be (expectedData2)
   }
 
   it should "expose the underlying map through .data" in {
@@ -112,12 +114,12 @@ class RecordSpec extends AnyFlatSpec with Matchers {
   }
 
 
-  "The copy method" should "preserve all data from the map" in {
+  "The update methods" should "preserve all data from the map" in {
     val data = Map("id" -> 100, "name" -> "testusr", "anotherHiddenValue" -> 998)
     val expectedData = Map("id" -> 301, "name" -> "testusr", "anotherHiddenValue" -> 998)
     val record2 = Record2(data)
 
-    record2.copy(id = 301).data should be (expectedData)
+    record2.withId(301).data should be (expectedData)
   }
 
 
@@ -186,6 +188,21 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     (record.equals(data3)) should be (false)
 
   }
+
+
+  "Records extending other records" should "have inherited fields in the field constructor as well" in {
+    val record6 = Record6(id = 100, name = "foo", description5 = "bar", description6 = "baz")
+    record6.data  should be (Map("id" -> 100, "name" -> "foo", "description5" -> "bar", "description6" -> "baz"))
+  }
+
+  it should "reuse implementations from inherited methods" in {
+
+    //compilation fails if this test fails
+    val record7 = Record7(id = 100, name = "foo", description5 = "bar", description6 = "baz", foo = "bla")
+    record7.data  should be (Map("id" -> 100, "name" -> "foo", "description5" -> "bar", "description6" -> "baz", "foo" -> "bla"))
+  }
+
+
 
 
 }

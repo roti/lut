@@ -1,6 +1,6 @@
 package roti.lut
 
-import roti.lut.annotation.field
+import roti.lut.annotation.fields
 
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
@@ -51,23 +51,23 @@ object Record {
 
     val ctor = m.reflect(cm.instance).reflectMethod(ctorSymbol)
 
-    val fieldAnnTpe = ru.typeOf[field]
     val recordTpe = ru.typeOf[Record]
     val optionTpe = ru.typeOf[Option[_]]
 
-    val fields = tpe.decls.filter(m => m.isMethod && m.annotations.find(a => a.tree.tpe =:= fieldAnnTpe).isDefined).map(_.asMethod)
-    val subRecordFields = fields.filter(m => m.returnType <:< recordTpe)
-    val optSubRecordFields = fields.filter(m => m.returnType <:< optionTpe && m.returnType.typeArgs.head <:< recordTpe)
+    val fields = getFieldInfo(tpe)
+    //val fields = tpe.decls.filter(m => m.isMethod && m.annotations.find(a => a.tree.tpe =:= fieldAnnTpe).isDefined).map(_.asMethod)
+    val subRecordFields = fields.filter(m => m._2 <:< recordTpe)
+    val optSubRecordFields = fields.filter(m => m._2 <:< optionTpe && m._2.typeArgs.head <:< recordTpe)
 
     val convertedData = subRecordFields.foldLeft(data) { (result, m) =>
-      val fieldName = m.name.toString
+      val fieldName = m._1
       val data = result.getOrElse(fieldName, throw new RecordException(s"missing data for $fieldName")).asInstanceOf[Map[String, Any]]
-      result + (fieldName -> to(data, m.returnType))
+      result + (fieldName -> to(data, m._2))
     }
 
     val convertedData2 = optSubRecordFields.foldLeft(convertedData) { (result, m) =>
-      val fieldName = m.name.toString
-      val tpe = m.returnType.typeArgs.head
+      val fieldName = m._1
+      val tpe = m._2.typeArgs.head
       result.get(fieldName).map(ddata =>
         result + (fieldName -> to(ddata.asInstanceOf[Map[String, Any]], tpe))
       ).getOrElse(result)
@@ -77,5 +77,31 @@ object Record {
 
   }
 
+
+  /**
+   * Returns record information from the fields annotation.
+   * Basically the Same as RecordMacroImpl.getFieldInfo
+   */
+  private def getFieldInfo(tpe: ru.Type): Map[String, ru.Type] = {
+
+    val fieldsTpe = ru.typeOf[fields]
+
+    val fieldsAnnot = tpe.typeSymbol.annotations.find(_.tree.tpe =:= fieldsTpe)
+
+    val fieldNames = fieldsAnnot match {
+      case None => Set.empty
+      case Some(annot) =>
+        annot.tree.children.foldLeft(Set.empty[String])((result, a) =>
+          a match {
+            case ru.Literal(name) =>
+              result + name.value.asInstanceOf[String]
+            case _ => result
+          }
+        )
+    }
+
+    fieldNames.map(name => (name, tpe.member(ru.TermName(name)).asMethod.returnType)).toMap
+
+  }
 
 }
