@@ -136,7 +136,7 @@ class RecordMacroImpl(val c: whitebox.Context) {
       //this needs to be a value definition because of the default parameter value
       //(q"val $name: $returnType = $name", q"(${name.toString}, $name)")
 
-      q"def ${TermName("with" + name.toString.capitalize)}($name: $returnType): $className = ${className.toTermName}(data + ((${name.toString}, $name)))"
+      q"def $name($name: $returnType): $className = ${className.toTermName}(data + ((${name.toString}, $name)))"
     }
 
     //val args = argsWithValues.map(_._1)
@@ -236,7 +236,11 @@ class RecordMacroImpl(val c: whitebox.Context) {
         )
     }
 
-    fieldNames.map(name => (name, tpe.member(TermName(name)).asMethod.returnType)).toMap
+    fieldNames.map { name =>
+      //since there are at least two methods with the same name, we need to find the one without params
+      val method = tpe.member(TermName(name)).alternatives.find(m => m.asMethod.paramLists.isEmpty)
+      (name, method.head.asMethod.returnType)
+    }.toMap
 
   }
 

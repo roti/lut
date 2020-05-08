@@ -81,8 +81,8 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     val expectedData2 = Map("id" -> 301, "name" -> "foo")
     val record2 = Record2(data)
 
-    record2.withId(301.toLong).data should be (expectedData)
-    record2.withId(301.toLong).withName("foo") should be (expectedData2)
+    record2.id(301.toLong).data should be (expectedData)
+    record2.id(301.toLong).name("foo") should be (expectedData2)
   }
 
   it should "expose the underlying map through .data" in {
@@ -119,7 +119,7 @@ class RecordSpec extends AnyFlatSpec with Matchers {
     val expectedData = Map("id" -> 301, "name" -> "testusr", "anotherHiddenValue" -> 998)
     val record2 = Record2(data)
 
-    record2.withId(301).data should be (expectedData)
+    record2.id(301).data should be (expectedData)
   }
 
 

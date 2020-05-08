@@ -100,7 +100,11 @@ object Record {
         )
     }
 
-    fieldNames.map(name => (name, tpe.member(ru.TermName(name)).asMethod.returnType)).toMap
+    fieldNames.map { name =>
+      //since there are at least two methods with the same name, we need to find the one without params
+      val method = tpe.member(ru.TermName(name)).alternatives.find(m => m.asMethod.paramLists.isEmpty)
+      (name, method.head.asMethod.returnType)
+    }.toMap
 
   }
 

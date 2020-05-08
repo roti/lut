@@ -5,11 +5,11 @@ Lut is an attempt to make data modelling easier in Scala. The design is inspired
 Scala's case classes are problematic for modelling data. They don't compose and include optionality, leading to a proliferation of classes and a lot of conversions between them.
 
 Lut strives to offer an alternative, which:
-* uses immutablity
+* works with immutable values
 * allows composition by inheritance
-* allows working with partial data
+* allows partial data
 
-The basic idea is to keep data in maps, like Clojure does, and access it in a (relatively) typesafe manner through interfaces. 
+The basic idea is to keep data in maps and access it in a (relatively) typesafe manner through interfaces. 
 This way it looks and behaves like a normal class, with statically declared data members, while the implementation is actually a dynamic immutable map.
 
 ### Dependency
@@ -34,7 +34,7 @@ addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1")
 
 ### Usage
 
-Build the data class as a trait extending `Record` and annotate it with `@record`. (We'll call it a record from now on)
+Build the data class as a trait extending `Record` and annotate it with `@record`. We'll call it a record from now on.
 
 ```scala
 import roti.lut.annotation.record
@@ -58,14 +58,15 @@ val data: Map[String, Any] = Map("id" -> 100, "firstName" -> "John", "lastName" 
 val employee = Employee(data)
 println(employee.firstName + " " + employee.lastName + " " + employee.phoneNumber )  //"John Smith None"
 
-//updates are done through `withXXX` methods, which return a new modified instance
-val employee2 = employee.withPhoneNumber(Some("123"))
+//Each abstract method has an update method, with the same name, but accepting a parameter.
+//The update method returns a new modified instance of the record.
+val employee2 = employee.phoneNumber(Some("123"))
 println(employee.firstName + " " + employee.lastName + " " + employee.phoneNumber )  //"John Smith Some(123)"
 
 //instances can be created either from a Map[String, Any] or from individual field values  
 val employee3 = Employee(id = 100, firstName = "John", lastName = "Smith", phoneNumber = None)
 
-//there's a macro generated unapply method as well
+//destructuring works
 val Employee(id, fName, lName, _) = employee3
 println(id + " " + fName + " " + lName)  //100 John Smith
 ```
@@ -78,7 +79,7 @@ val data: Map[String, Any] = Map("id" -> 100, "firstName" -> "John", "lastName" 
 val employee = Employee(data)
 println(employee.data.get("foo") )  //Some("bar")
 
-val employee2 = employee.withPhoneNumber(Some("123"))
+val employee2 = employee.phoneNumber(Some("123"))
 println(employee2.data.get("foo") )  //Some("bar")
 ```
 
