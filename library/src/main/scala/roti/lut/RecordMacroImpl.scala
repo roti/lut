@@ -61,7 +61,10 @@ class RecordMacroImpl(val c: whitebox.Context) {
     val transformedBody = impl.body.map(m =>
       m match {
         case methodDef: DefDef if methodDef.rhs.isEmpty =>
-          val retType = c.typecheck(methodDef.tpt, c.TYPEmode)
+
+          //withMacrosDiables is set to true for cases where a record references itself (e.g. has an abstract method which has a return type the same record, or Option[...])
+          //TODO this may come in conflict with other annotation macros. with macros enabled
+          val retType = c.typecheck(methodDef.tpt, c.TYPEmode, withMacrosDisabled = true)
           fields += (methodDef.name.toString -> retType.tpe)
           transformMethod(methodDef, parentFields)
         case x => x
@@ -109,8 +112,10 @@ class RecordMacroImpl(val c: whitebox.Context) {
       }
 
       if (typeParams.size > 0)
-        throw new RecordException("type parameters are not allowed on abstract method")
+        throw new RecordException("type parameters are not allowed on abstract methods")
 
+      //apparently because typecheck is called before for this type, this call does not do anything
+      //if it would do, then a StackOverflow would occur of records which reference themselves, becaue macros are enabled
       val returnTpe = c.typecheck(returnType, c.TYPEmode)
 
       if (returnTpe.tpe <:< optionTpe) {
