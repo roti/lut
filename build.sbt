@@ -1,6 +1,6 @@
 
 organization in ThisBuild := "com.github.roti"
-version in ThisBuild := "0.5-SNAPSHOT"
+version in ThisBuild := "0.5"
 
 intellijBuild in ThisBuild := "193.6494.35"
 intellijPluginName in ThisBuild := "lut-intellij-support"
@@ -42,7 +42,7 @@ lazy val intellijSupport = project.in(file("intellij-support")).settings(
 onLoad in Global := (onLoad in Global).value andThen { s: State => "project library" :: s }
 
 publishMavenStyle in ThisBuild := true
-credentials in ThisBuild += Credentials(Path.userHome / ".sbt" / ".credentials")
+credentials in ThisBuild += Credentials(Path.userHome / ".sonatype_credentials")
 
 publishTo in ThisBuild := {
   val nexus = "https://oss.sonatype.org/"
@@ -51,3 +51,26 @@ publishTo in ThisBuild := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
+
+
+scmInfo in ThisBuild := Some(
+  ScmInfo(
+    url("https://github.com/roti/lut"),
+    "scm:git@github.com:roti/lut.git"
+  )
+)
+
+developers in ThisBuild := List(
+  Developer(
+    id    = "roti",
+    name  = "Răzvan Rotaru",
+    email = "razvan.rotaru@gmail.com",
+    url   = url("https://github.com/roti")
+  )
+)
+
+description in ThisBuild := "A library for data modelling in Scala"
+licenses in ThisBuild := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+homepage in ThisBuild := Some(url("https://github.com/roti/lut"))
+
+

@@ -15,7 +15,7 @@ This way it looks and behaves like a normal class, with statically declared data
 ### Dependency
 
 ```scala
-libraryDependencies += "com.github.roti" %% "lut" % "0.5-SNAPSHOT"
+libraryDependencies += "com.github.roti" %% "lut" % "0.5"
 ```
 
 ### Scala Versions
